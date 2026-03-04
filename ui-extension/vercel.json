@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/agents/:match*", "destination": "http://localhost:3000/agents/:match*" }
+  ]
+}

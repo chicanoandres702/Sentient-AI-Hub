@@ -1,34 +1,43 @@
 import React, { useState } from 'react';
-import { runMainAgentWorkflow, getAuditLog } from './api';
 import GateStatus from './GateStatus';
 import WorkflowTrigger from './WorkflowTrigger';
 import AuditLog from './AuditLog';
 import { githubColors, neonGlow } from './githubTheme';
+import { getStatus, triggerWorkflow, getAuditLog } from './api';
 
 function App() {
   const [status, setStatus] = useState({});
   const [logs, setLogs] = useState([]);
   const [running, setRunning] = useState(false);
 
-  // Trigger backend workflow and fetch audit log
+  // Fetch gate status from backend
+  const fetchStatus = async () => {
+    try {
+      const data = await getStatus();
+      setStatus(data.gates || {});
+    } catch (e) {
+      setStatus({});
+    }
+  };
+
+  // Trigger workflow and fetch audit log
   const runWorkflow = async () => {
     setRunning(true);
     setLogs([]);
-    setStatus({});
     try {
-      const result = await runMainAgentWorkflow();
-      setStatus(result.status || {});
-      setLogs(result.logs || []);
+      await triggerWorkflow();
+      await fetchStatus();
+      const audit = await getAuditLog();
+      setLogs(audit);
     } catch (e) {
       setLogs([`Error: ${e.message}`]);
     }
     setRunning(false);
-    // Optionally fetch audit log after workflow
-    try {
-      const audit = await getAuditLog();
-      setLogs(logs => [...logs, ...audit]);
-    } catch {}
   };
+
+  React.useEffect(() => {
+    fetchStatus();
+  }, []);
 
   return (
     <div
@@ -49,7 +58,7 @@ function App() {
           marginBottom: 24,
         }}
       >
-        Sentient Agent Hub UI
+        Sentient Agent Hub Dashboard
       </h1>
       <WorkflowTrigger onTrigger={runWorkflow} running={running} />
       <GateStatus status={status} />

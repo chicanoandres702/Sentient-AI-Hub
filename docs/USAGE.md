@@ -23,6 +23,17 @@ Sentient Agent Hub supports two authentication methods:
   - If not, agents fall back to GitHub App credentials.
 - You can switch methods at any time—just ensure one is configured.
 
+## Automated GitHub App Installation Token Retrieval
+
+1. Edit `scripts/github-app-config.json` and fill in your App ID, Install ID, and private key path.
+2. Run:
+   ```sh
+   node scripts/get-installation-token.js
+   ```
+3. The script will print your installation token and expiration time.
+
+Use this token for advanced GitHub App API automation.
+
 ## Setup
 1. Install Node.js, Python, npm, and GitHub CLI (`gh`).
 2. Clone the repo and run `npm install`.

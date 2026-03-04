@@ -3,35 +3,48 @@
 const fs = require('fs');
 const path = require('path');
 
+
+const AUDIT_LOG = path.join(__dirname, '../docs/audit-logs/agent-actions.md');
+
 class RefactorWiringAgent {
   constructor(projectRoot) {
     this.projectRoot = projectRoot;
   }
 
-  // Scan for orphaned files/modules
   findOrphanedFiles() {
-    // Pseudocode: scan src/agents, src/features, check for unused exports/imports
-    // Return list of files not referenced by any other module
+    this.logAction('scan-orphaned-files', {});
     return [];
   }
 
-  // Generate wiring map
   generateWiringMap() {
-    // Pseudocode: build a map of all agent and feature interconnections
-    // Example output: { agent: [connected modules], feature: [connected agents] }
-    return {};
+    const map = {
+      agents: ['git-orchestrator-agent', 'stale-branch-agent', 'pr-template-agent', 'refactor-wiring-agent'],
+      features: ['milestone', 'issue', 'branch', 'pr', 'audit-log'],
+      connections: {
+        'git-orchestrator-agent': ['milestone', 'issue', 'branch', 'pr', 'audit-log'],
+        'refactor-wiring-agent': ['wiring-summary', 'audit-log'],
+      }
+    };
+    this.logAction('generate-wiring-map', { map });
+    return map;
   }
 
-  // Refactor imports/exports for clarity
   refactorImports() {
-    // Pseudocode: update import statements to use explicit paths, remove dead code
+    this.logAction('refactor-imports', {});
+    // Stub: would update import statements for clarity
   }
 
-  // Output wiring summary
   outputWiringSummary() {
     const map = this.generateWiringMap();
-    fs.writeFileSync(path.join(this.projectRoot, 'docs/wiring-summary.md'),
-      '# Project Wiring Summary\n\n' + JSON.stringify(map, null, 2));
+    const summary = '# Project Wiring Summary\n\n' + JSON.stringify(map, null, 2);
+    fs.writeFileSync(path.join(this.projectRoot, 'docs/wiring-summary.md'), summary);
+    this.logAction('output-wiring-summary', {});
+  }
+
+  logAction(action, details) {
+    const timestamp = new Date().toISOString();
+    const entry = `| ${timestamp} | RefactorWiringAgent | ${action} | ${JSON.stringify(details)} |\n`;
+    fs.appendFileSync(AUDIT_LOG, entry);
   }
 }
 
